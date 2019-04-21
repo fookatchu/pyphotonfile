@@ -3,6 +3,8 @@ import sys
 import os
 import numpy as np
 from PIL import Image
+import pkgutil
+import io
 
 def rle_to_imgarray(data):
     """
@@ -111,71 +113,79 @@ class Photon:
     def __init__(self, filepath=None):
         if filepath is None:
             # filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'testfiles', 'newfile.photon')
-            filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'newfile.photon')
-            self._open(filepath)
+            # filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'newfile.photon')
+            # self._open(filepath)
+            self._open()
             self.delete_layers()
         else:
             self._open(filepath)
 
-    def _open(self, filepath):
-        with open(filepath, 'rb') as f:
-            self._header = f.read(8)
-            self._bed_x = struct.unpack('f', f.read(4))[0]
-            self._bed_y = struct.unpack('f', f.read(4))[0]
-            self._bed_z = struct.unpack('f', f.read(4))[0]
-            f.seek(3*4, os.SEEK_CUR)    # padding
-            self.layer_height = struct.unpack('f', f.read(4))[0]
-            self.exposure_time = struct.unpack('f', f.read(4))[0]
-            self.exposure_time_bottom = struct.unpack('f', f.read(4))[0]
-            self.off_time = struct.unpack('f', f.read(4))[0]
-            self.bottom_layers = struct.unpack('i', f.read(4))[0]
-            self._resolution_x = struct.unpack('i', f.read(4))[0]
-            self._resolution_y = struct.unpack('i', f.read(4))[0]
-            self._preview_highres_header_address = struct.unpack('i', f.read(4))[0]
-            self._layer_def_address = struct.unpack('i', f.read(4))[0]
-            n_layers = struct.unpack('i', f.read(4))[0]
-            self._preview_lowres_header_address = struct.unpack('i', f.read(4))[0]
-            f.seek(4, os.SEEK_CUR)    # padding
-            self._projection_type = struct.unpack('i', f.read(4))[0]
-            f.seek(6*4, os.SEEK_CUR)    # padding
+    def _open(self, filepath=None):
+        if filepath is None:
+            data = pkgutil.get_data(__package__, 'newfile.photon')
+        else:
+            with open(filepath, 'rb') as f:
+                data = f.read()
+        # embed()
+        f = io.BytesIO(data)
+        self._header = f.read(8)
+        self._bed_x = struct.unpack('f', f.read(4))[0]
+        self._bed_y = struct.unpack('f', f.read(4))[0]
+        self._bed_z = struct.unpack('f', f.read(4))[0]
+        f.seek(3*4, os.SEEK_CUR)    # padding
+        self.layer_height = struct.unpack('f', f.read(4))[0]
+        self.exposure_time = struct.unpack('f', f.read(4))[0]
+        self.exposure_time_bottom = struct.unpack('f', f.read(4))[0]
+        self.off_time = struct.unpack('f', f.read(4))[0]
+        self.bottom_layers = struct.unpack('i', f.read(4))[0]
+        self._resolution_x = struct.unpack('i', f.read(4))[0]
+        self._resolution_y = struct.unpack('i', f.read(4))[0]
+        self._preview_highres_header_address = struct.unpack('i', f.read(4))[0]
+        self._layer_def_address = struct.unpack('i', f.read(4))[0]
+        n_layers = struct.unpack('i', f.read(4))[0]
+        self._preview_lowres_header_address = struct.unpack('i', f.read(4))[0]
+        f.seek(4, os.SEEK_CUR)    # padding
+        self._projection_type = struct.unpack('i', f.read(4))[0]
+        f.seek(6*4, os.SEEK_CUR)    # padding
 
-            f.seek(self._preview_highres_header_address, os.SEEK_SET)
-            self._preview_highres_resolution_x = struct.unpack('i', f.read(4))[0]
-            self._preview_highres_resolution_y = struct.unpack('i', f.read(4))[0]
-            self._preview_highres_data_address = struct.unpack('i', f.read(4))[0]
-            self._preview_highres_data_length = struct.unpack('i', f.read(4))[0]
+        f.seek(self._preview_highres_header_address, os.SEEK_SET)
+        self._preview_highres_resolution_x = struct.unpack('i', f.read(4))[0]
+        self._preview_highres_resolution_y = struct.unpack('i', f.read(4))[0]
+        self._preview_highres_data_address = struct.unpack('i', f.read(4))[0]
+        self._preview_highres_data_length = struct.unpack('i', f.read(4))[0]
+        f.seek(4*4, os.SEEK_CUR)    # padding
+        self._preview_highres_data = f.read(self._preview_highres_data_length)
+
+        f.seek(self._preview_lowres_header_address, os.SEEK_SET)
+        self._preview_lowres_resolution_x = struct.unpack('i', f.read(4))[0]
+        self._preview_lowres_resolution_y = struct.unpack('i', f.read(4))[0]
+        self._preview_lowres_data_address = struct.unpack('i', f.read(4))[0]
+        self._preview_lowres_data_length = struct.unpack('i', f.read(4))[0]
+        f.seek(4*4, os.SEEK_CUR)    # padding
+        self._preview_lowres_data = f.read(self._preview_lowres_data_length)
+
+        f.seek(self._layer_def_address, os.SEEK_SET)
+
+        self.layers = []
+        for i in range(n_layers):
+            layer_height = struct.unpack('f', f.read(4))[0]
+            try:
+                layer_thickness = layer_height - previous_layer_height
+            except UnboundLocalError:
+                layer_thickness = self.layer_height
+                previous_layer_height = layer_thickness
+            previous_layer_height = layer_height
+            exposure_time = struct.unpack('f', f.read(4))[0]
+            off_time = struct.unpack('f', f.read(4))[0]
+            address = struct.unpack('i', f.read(4))[0]
+            data_length = struct.unpack('i', f.read(4))[0]
             f.seek(4*4, os.SEEK_CUR)    # padding
-            self._preview_highres_data = f.read(self._preview_highres_data_length)
-
-            f.seek(self._preview_lowres_header_address, os.SEEK_SET)
-            self._preview_lowres_resolution_x = struct.unpack('i', f.read(4))[0]
-            self._preview_lowres_resolution_y = struct.unpack('i', f.read(4))[0]
-            self._preview_lowres_data_address = struct.unpack('i', f.read(4))[0]
-            self._preview_lowres_data_length = struct.unpack('i', f.read(4))[0]
-            f.seek(4*4, os.SEEK_CUR)    # padding
-            self._preview_lowres_data = f.read(self._preview_lowres_data_length)
-
-            f.seek(self._layer_def_address, os.SEEK_SET)
-
-            self.layers = []
-            for i in range(n_layers):
-                layer_height = struct.unpack('f', f.read(4))[0]
-                try:
-                    layer_thickness = layer_height - previous_layer_height
-                except UnboundLocalError:
-                    layer_thickness = self.layer_height
-                    previous_layer_height = layer_thickness
-                previous_layer_height = layer_height
-                exposure_time = struct.unpack('f', f.read(4))[0]
-                off_time = struct.unpack('f', f.read(4))[0]
-                address = struct.unpack('i', f.read(4))[0]
-                data_length = struct.unpack('i', f.read(4))[0]
-                f.seek(4*4, os.SEEK_CUR)    # padding
-                curpos = f.tell()
-                f.seek(address, os.SEEK_SET)
-                data = f.read(data_length)
-                self.layers.append(Layer(data, layer_thickness, exposure_time, off_time))
-                f.seek(curpos, os.SEEK_SET)
+            curpos = f.tell()
+            f.seek(address, os.SEEK_SET)
+            data = f.read(data_length)
+            self.layers.append(Layer(data, layer_thickness, exposure_time, off_time))
+            f.seek(curpos, os.SEEK_SET)
+        f.close()
 
     def write(self, filepath):
         """
@@ -294,13 +304,13 @@ class Photon:
         layer = Layer(data, layer_thickness, exposure_time, off_time)
         self.layers.append(layer)
 
-    def append_layers(self, filepaths, layer_thickness=None, exposure_time=None, off_time=None):
+    def append_layers(self, dirpath, layer_thickness=None, exposure_time=None, off_time=None):
         """
-        Appends multiple new layers. filepaths should be a list of filepaths. Argument exposure_time
+        Appends multiple new layers. dirpath should be an existing directory. Argument exposure_time
         seems to be not used by the firmware. If keyword args are ommited, falls back to global values.
         """
-        for filepath in filepaths:
-            self.append_layer(filepath, layer_thickness, exposure_time, off_time)
+        for filepath in os.listdir(dirpath):
+            self.append_layer(os.path.join(dirpath, filepath), layer_thickness, exposure_time, off_time)
 
     def insert_layer(self, filepath, idx, layer_thickness=None, exposure_time=None, off_time=None):
         """
