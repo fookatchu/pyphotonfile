@@ -16,7 +16,7 @@ setup(name='pyphotonfile',
       url="https://github.com/fookatchu/pyphotonfile",
       packages=find_packages(),
       package_data={
-        'pyphotonfile': ['data/newfile.photon'],
+        'pyphotonfile': ['newfile.photon'],
         },
       install_requires=['numpy', 'Pillow'],
       classifiers=[
