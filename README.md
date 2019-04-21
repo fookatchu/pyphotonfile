@@ -6,6 +6,12 @@ Friendly Reminder
 =================
    Use at your own risk. Please verify that what you are doing will not break your printer.
 
+Installation
+=================
+```
+pip install pyphotonfile
+```
+
 Example Usage
 ========================================
 ```python
