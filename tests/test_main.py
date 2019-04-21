@@ -15,6 +15,13 @@ def test_photonfile_no_modifications(temp_folder):
         old_crc = f.read()
     assert old_crc == new_crc
 
+def test_photonfile_new(temp_folder):
+    photon_original = photonfile.Photon('tests\\testfiles\\pyphotonfile_reference.photon')
+    photon_new = photonfile.Photon()
+    photon_original.export_images(temp_folder)
+    photon_new.append_layers(temp_folder)
+    assert True == True
+
 
 def test_photonfile_properties(temp_folder):
     photon_original = photonfile.Photon('tests\\testfiles\\pyphotonfile_reference.photon')
