@@ -1,0 +1,94 @@
+digraph {
+	rankdir=LR;
+	node [shape=plaintext];
+	subgraph cluster__photon {
+		label="Photon";
+		graph[style=dotted];
+
+		photon__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+			<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+			<TR><TD PORT="magic_pos">0</TD><TD PORT="magic_size">8</TD><TD>u8le</TD><TD PORT="magic_type">magic</TD></TR>
+			<TR><TD PORT="bed_x_pos">8</TD><TD PORT="bed_x_size">4</TD><TD>f4le</TD><TD PORT="bed_x_type">bed_x</TD></TR>
+			<TR><TD PORT="bed_y_pos">12</TD><TD PORT="bed_y_size">4</TD><TD>f4le</TD><TD PORT="bed_y_type">bed_y</TD></TR>
+			<TR><TD PORT="bed_z_pos">16</TD><TD PORT="bed_z_size">4</TD><TD>f4le</TD><TD PORT="bed_z_type">bed_z</TD></TR>
+			<TR><TD PORT="padding_1_pos">20</TD><TD PORT="padding_1_size">12</TD><TD></TD><TD PORT="padding_1_type">padding_1</TD></TR>
+			<TR><TD PORT="layer_height_pos">32</TD><TD PORT="layer_height_size">4</TD><TD>f4le</TD><TD PORT="layer_height_type">layer_height</TD></TR>
+			<TR><TD PORT="exposure_time_pos">36</TD><TD PORT="exposure_time_size">4</TD><TD>f4le</TD><TD PORT="exposure_time_type">exposure_time</TD></TR>
+			<TR><TD PORT="exposure_time_bottom_pos">40</TD><TD PORT="exposure_time_bottom_size">4</TD><TD>f4le</TD><TD PORT="exposure_time_bottom_type">exposure_time_bottom</TD></TR>
+			<TR><TD PORT="off_time_pos">44</TD><TD PORT="off_time_size">4</TD><TD>f4le</TD><TD PORT="off_time_type">off_time</TD></TR>
+			<TR><TD PORT="bottom_layers_pos">48</TD><TD PORT="bottom_layers_size">4</TD><TD>s4le</TD><TD PORT="bottom_layers_type">bottom_layers</TD></TR>
+			<TR><TD PORT="resolution_x_pos">52</TD><TD PORT="resolution_x_size">4</TD><TD>s4le</TD><TD PORT="resolution_x_type">resolution_x</TD></TR>
+			<TR><TD PORT="resolution_y_pos">56</TD><TD PORT="resolution_y_size">4</TD><TD>s4le</TD><TD PORT="resolution_y_type">resolution_y</TD></TR>
+			<TR><TD PORT="preview_highres_pos">60</TD><TD PORT="preview_highres_size">4</TD><TD>PreviewImage</TD><TD PORT="preview_highres_type">preview_highres</TD></TR>
+			<TR><TD PORT="layer_def_address_pos">64</TD><TD PORT="layer_def_address_size">4</TD><TD>s4le</TD><TD PORT="layer_def_address_type">layer_def_address</TD></TR>
+			<TR><TD PORT="n_layers_pos">68</TD><TD PORT="n_layers_size">4</TD><TD>s4le</TD><TD PORT="n_layers_type">n_layers</TD></TR>
+			<TR><TD PORT="preview_lowres_pos">72</TD><TD PORT="preview_lowres_size">4</TD><TD>PreviewImage</TD><TD PORT="preview_lowres_type">preview_lowres</TD></TR>
+			<TR><TD PORT="padding_2_pos">76</TD><TD PORT="padding_2_size">4</TD><TD></TD><TD PORT="padding_2_type">padding_2</TD></TR>
+			<TR><TD PORT="projection_type_pos">80</TD><TD PORT="projection_type_size">4</TD><TD>s4le</TD><TD PORT="projection_type_type">projection_type</TD></TR>
+			<TR><TD PORT="padding_3_pos">84</TD><TD PORT="padding_3_size">24</TD><TD></TD><TD PORT="padding_3_type">padding_3</TD></TR>
+		</TABLE>>];
+		photon__inst__layers [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+			<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+			<TR><TD PORT="layers_pos">layer_def_address</TD><TD PORT="layers_size">36</TD><TD>Layer</TD><TD PORT="layers_type">layers</TD></TR>
+			<TR><TD COLSPAN="4" PORT="layers__repeat">repeat n_layers times</TD></TR>
+		</TABLE>>];
+		subgraph cluster__preview_image {
+			label="Photon::PreviewImage";
+			graph[style=dotted];
+
+			preview_image__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="header_address_pos">0</TD><TD PORT="header_address_size">4</TD><TD>s4le</TD><TD PORT="header_address_type">header_address</TD></TR>
+			</TABLE>>];
+			preview_image__inst__header [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="header_pos">header_address</TD><TD PORT="header_size">16</TD><TD>PreviewImageHeader</TD><TD PORT="header_type">header</TD></TR>
+			</TABLE>>];
+			preview_image__inst__image [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="image_pos">header.data_address</TD><TD PORT="image_size">header.data_length</TD><TD></TD><TD PORT="image_type">image</TD></TR>
+			</TABLE>>];
+		}
+		subgraph cluster__preview_image_header {
+			label="Photon::PreviewImageHeader";
+			graph[style=dotted];
+
+			preview_image_header__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="resolution_x_pos">0</TD><TD PORT="resolution_x_size">4</TD><TD>s4le</TD><TD PORT="resolution_x_type">resolution_x</TD></TR>
+				<TR><TD PORT="resolution_y_pos">4</TD><TD PORT="resolution_y_size">4</TD><TD>s4le</TD><TD PORT="resolution_y_type">resolution_y</TD></TR>
+				<TR><TD PORT="data_address_pos">8</TD><TD PORT="data_address_size">4</TD><TD>s4le</TD><TD PORT="data_address_type">data_address</TD></TR>
+				<TR><TD PORT="data_length_pos">12</TD><TD PORT="data_length_size">4</TD><TD>s4le</TD><TD PORT="data_length_type">data_length</TD></TR>
+			</TABLE>>];
+		}
+		subgraph cluster__layer {
+			label="Photon::Layer";
+			graph[style=dotted];
+
+			layer__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="height_pos">0</TD><TD PORT="height_size">4</TD><TD>f4le</TD><TD PORT="height_type">height</TD></TR>
+				<TR><TD PORT="exposure_pos">4</TD><TD PORT="exposure_size">4</TD><TD>f4le</TD><TD PORT="exposure_type">exposure</TD></TR>
+				<TR><TD PORT="off_time_pos">8</TD><TD PORT="off_time_size">4</TD><TD>f4le</TD><TD PORT="off_time_type">off_time</TD></TR>
+				<TR><TD PORT="data_address_pos">12</TD><TD PORT="data_address_size">4</TD><TD>s4le</TD><TD PORT="data_address_type">data_address</TD></TR>
+				<TR><TD PORT="data_length_pos">16</TD><TD PORT="data_length_size">4</TD><TD>s4le</TD><TD PORT="data_length_type">data_length</TD></TR>
+				<TR><TD PORT="padding_pos">20</TD><TD PORT="padding_size">16</TD><TD></TD><TD PORT="padding_type">padding</TD></TR>
+			</TABLE>>];
+			layer__inst__image [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="image_pos">data_address</TD><TD PORT="image_size">data_length</TD><TD></TD><TD PORT="image_type">image</TD></TR>
+			</TABLE>>];
+		}
+	}
+	photon__seq:preview_highres_type -> preview_image__seq [style=bold];
+	photon__seq:preview_lowres_type -> preview_image__seq [style=bold];
+	photon__seq:layer_def_address_type -> photon__inst__layers:layers_pos [color="#404040"];
+	photon__inst__layers:layers_type -> layer__seq [style=bold];
+	photon__seq:n_layers_type -> photon__inst__layers:layers__repeat [color="#404040"];
+	preview_image__seq:header_address_type -> preview_image__inst__header:header_pos [color="#404040"];
+	preview_image__inst__header:header_type -> preview_image_header__seq [style=bold];
+	preview_image_header__seq:data_address_type -> preview_image__inst__image:image_pos [color="#404040"];
+	preview_image_header__seq:data_length_type -> preview_image__inst__image:image_size [color="#404040"];
+	layer__seq:data_address_type -> layer__inst__image:image_pos [color="#404040"];
+	layer__seq:data_length_type -> layer__inst__image:image_size [color="#404040"];
+}
