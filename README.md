@@ -28,3 +28,10 @@ Example Usage
     photon.bottom_layers = 3
     photon.write('out_file.Photon')
 ```
+
+TODO / Roadmap (contributions welcome)
+========================================
+ - add support for anti-aliasing feature / 'v2' photon-file format
+ - release proper documentation
+ - remove dependency of template binary file for newly created photon-files
+ - add support for photonS file format
