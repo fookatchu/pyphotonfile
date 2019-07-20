@@ -1,4 +1,5 @@
 pyPhotonfile is a library used for manipulating Photon-files created for the Anycubic Photon 3D-Printer. Currently it supports removing and adding new layers as well as changing global parameters like the exposure time, etc.
+A general description of the fileformat can be found in folder 'fileformat' including fancy graphs.
 It is based on the work done by [PhotonFileEditor](https://github.com/Photonsters/PhotonFileEditor). While PhotonFileEditor works, I was in need of a clean library which is why I refactored most of the code.
 pyPhotonfile is the backbone of [SL1toPhoton](https://github.com/fookatchu/SL1toPhoton).
 
