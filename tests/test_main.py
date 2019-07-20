@@ -15,6 +15,25 @@ def test_photonfile_no_modifications(temp_folder):
         old_crc = f.read()
     assert old_crc == new_crc
 
+def test_photonfile_replace_images(temp_folder):
+    photon_original = photonfile.Photon('tests\\testfiles\\pyphotonfile_reference.photon')
+    # photon_original.write(os.path.join(temp_folder + 'pyphotonfile_reference.photon'))
+    photon_new = photonfile.Photon('tests\\testfiles\\pyphotonfile_reference.photon')
+    photon_new.export_images(temp_folder)
+    photon_new.delete_layers()
+    paths = []
+    for filepath in glob.glob(os.path.join(temp_folder, '*.png')):
+        paths.append(filepath)
+        photon_new.append_layer(paths[-1])
+    photon_new.write(os.path.join(temp_folder + 'pyphotonfile_reference.photon'))
+    photon_new = photonfile.Photon(os.path.join(temp_folder + 'pyphotonfile_reference.photon'))
+
+    with open(os.path.join(temp_folder + 'pyphotonfile_reference.photon'), 'rb') as f:
+        new_crc = f.read()
+    with open('tests\\testfiles\\pyphotonfile_reference.photon', 'rb') as f:
+        old_crc = f.read()
+    assert old_crc == new_crc
+
 def test_photonfile_new(temp_folder):
     photon_original = photonfile.Photon('tests\\testfiles\\pyphotonfile_reference.photon')
     photon_new = photonfile.Photon()
