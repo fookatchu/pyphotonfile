@@ -128,7 +128,8 @@ class Photon:
                 data = f.read()
         # embed()
         f = io.BytesIO(data)
-        self._header = f.read(8)
+        self._header = f.read(4)
+        self._version = struct.unpack('i', f.read(4))[0]
         self._bed_x = struct.unpack('f', f.read(4))[0]
         self._bed_y = struct.unpack('f', f.read(4))[0]
         self._bed_z = struct.unpack('f', f.read(4))[0]
@@ -142,18 +143,30 @@ class Photon:
         self._resolution_y = struct.unpack('i', f.read(4))[0]
         self._preview_highres_header_address = struct.unpack('i', f.read(4))[0]
         self._layer_def_address = struct.unpack('i', f.read(4))[0]
-        n_layers = struct.unpack('i', f.read(4))[0]
+        self.n_layers = struct.unpack('i', f.read(4))[0]
         self._preview_lowres_header_address = struct.unpack('i', f.read(4))[0]
-        f.seek(4, os.SEEK_CUR)    # padding
+        if self._version > 1:
+            self._print_time = struct.unpack('i', f.read(4))[0]
+        else:
+            f.seek(4, os.SEEK_CUR)    # padding
         self._projection_type = struct.unpack('i', f.read(4))[0]
-        f.seek(6*4, os.SEEK_CUR)    # padding
+        self.layer_levels = 1
+        if self._version > 1:
+            self._print_properties_address = struct.unpack('i', f.read(4))[0]
+            self._print_properties_length = struct.unpack('i', f.read(4))[0]
+            self._anti_aliasing_level = struct.unpack('i', f.read(4))[0]
+            self.layer_levels = self._anti_aliasing_level
+            self.light_pwm = struct.unpack('h', f.read(2))[0]
+            self.light_pwm_bottom = struct.unpack('h', f.read(2))[0]
+        # else:
+        #     f.seek(6*4, os.SEEK_CUR)    # padding
 
         f.seek(self._preview_highres_header_address, os.SEEK_SET)
         self._preview_highres_resolution_x = struct.unpack('i', f.read(4))[0]
         self._preview_highres_resolution_y = struct.unpack('i', f.read(4))[0]
         self._preview_highres_data_address = struct.unpack('i', f.read(4))[0]
         self._preview_highres_data_length = struct.unpack('i', f.read(4))[0]
-        f.seek(4*4, os.SEEK_CUR)    # padding
+        # f.seek(4*4, os.SEEK_CUR)    # padding
         self._preview_highres_data = f.read(self._preview_highres_data_length)
 
         f.seek(self._preview_lowres_header_address, os.SEEK_SET)
@@ -161,13 +174,30 @@ class Photon:
         self._preview_lowres_resolution_y = struct.unpack('i', f.read(4))[0]
         self._preview_lowres_data_address = struct.unpack('i', f.read(4))[0]
         self._preview_lowres_data_length = struct.unpack('i', f.read(4))[0]
-        f.seek(4*4, os.SEEK_CUR)    # padding
+        # f.seek(4*4, os.SEEK_CUR)    # padding
         self._preview_lowres_data = f.read(self._preview_lowres_data_length)
 
-        f.seek(self._layer_def_address, os.SEEK_SET)
+        if self._version > 1:
+            f.seek(self._print_properties_address, os.SEEK_SET)
+            self._bottom_lift_distance = struct.unpack('f', f.read(4))[0]
+            self._bottom_lift_speed = struct.unpack('f', f.read(4))[0]
+            self._lifting_distance = struct.unpack('f', f.read(4))[0]
+            self._lifting_speed = struct.unpack('f', f.read(4))[0]
+            self._retract_speed = struct.unpack('f', f.read(4))[0]
+            self._volume_ml = struct.unpack('f', f.read(4))[0]
+            self._weight_g = struct.unpack('f', f.read(4))[0]
+            self._cost_dollars = struct.unpack('f', f.read(4))[0]
+            self._bottom_light_off_delay = struct.unpack('f', f.read(4))[0]
+            self._light_off_delay = struct.unpack('f', f.read(4))[0]
+            self._bottom_layer_count = struct.unpack('i', f.read(4))[0]
+            self._p1 = struct.unpack('f', f.read(4))[0]
+            self._p2 = struct.unpack('f', f.read(4))[0]
+            self._p3 = struct.unpack('f', f.read(4))[0]
+            self._p4 = struct.unpack('f', f.read(4))[0]
 
+        f.seek(self._layer_def_address, os.SEEK_SET)
         self.layers = []
-        for i in range(n_layers):
+        for i in range(self.n_layers * self.layer_levels):
             layer_height = struct.unpack('f', f.read(4))[0]
             try:
                 layer_thickness = layer_height - previous_layer_height
@@ -194,6 +224,7 @@ class Photon:
         self._update()
         with open(filepath, 'wb') as f:
             f.write(self._header)
+            f.write(struct.pack('i', self._version))
             f.write(struct.pack('f', self._bed_x))
             f.write(struct.pack('f', self._bed_y))
             f.write(struct.pack('f', self._bed_z))
@@ -210,9 +241,26 @@ class Photon:
             f.write(struct.pack('i', self._layer_def_address))
             f.write(struct.pack('i', len(self.layers)))
             f.write(struct.pack('i', self._preview_lowres_header_address))
-            f.write(b'\x00' * 4)  # padding
+            if self._version > 1:
+                f.write(struct.pack('i', self._print_time))
+            else:
+                f.write(b'\x00' * 4)  # padding
             f.write(struct.pack('i', self._projection_type))
-            f.write(b'\x00' * 6 * 4)  # padding
+            if self._version > 1:
+                # self._print_properties_address = struct.unpack('i', f.read(4))[0]
+                f.write(struct.pack('i', self._print_properties_address))
+                # self._print_properties_length = struct.unpack('i', f.read(4))[0]
+                f.write(struct.pack('i', self._print_properties_length))
+                # self._anti_aliasing_level = struct.unpack('i', f.read(4))[0]
+                f.write(struct.pack('i', self._anti_aliasing_level))
+                # self.layer_levels = self._anti_aliasing_level
+                # self.light_pwm = struct.unpack('h', f.read(2))[0]
+                f.write(struct.pack('h', self.light_pwm))
+                # self.light_pwm_bottom = struct.unpack('h', f.read(2))[0]
+                f.write(struct.pack('h', self.light_pwm_bottom))
+                f.write(b'\x00' * 2 * 4)
+            else:
+                f.write(b'\x00' * 6 * 4)  # padding
             # f.seek(self._preview_highres_header_address, os.SEEK_SET)
             f.write(struct.pack('i', self._preview_highres_resolution_x))
             f.write(struct.pack('i', self._preview_highres_resolution_y))
