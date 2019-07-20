@@ -69,36 +69,56 @@ seq:
     type: preview_image
     doc: low resolution preview image which gets shown on the printers display.
   - id: print_time
-    type: s4
-    if: version > 1
+    size: 4
+    type:
+      switch-on: version
+      cases:
+        1: unavailable
+        2: s4
     doc: estimated print time in seconds. new in version 2.
   - id: projection_type
     type: s4
     doc: TODO.
   - id: print_properties
-    type: print_properties
-    if: version > 1
+    size: 8
+    type:
+      switch-on: version
+      cases:
+        1: unavailable
+        2: print_properties
     doc: print properties. new in version 2.
   - id: antialiasing_level
     type: s4
-    doc: anti-aliasing level. 1 equals to no aa. new in version 2.
+    doc: anti-aliasing level. 0 and 1 equals to no aa. new in version 2.
   - id: light_pwm
-    type: s2
-    if: version > 1
+    size: 2
+    type:
+      switch-on: version
+      cases:
+        1: unavailable
+        2: s2
     doc: possibly light intensity of non-bottom-layers. new in version 2, unverified.
   - id: light_pwm_bottom
-    type: s2
-    if: version > 1
+    size: 2
+    type:
+      switch-on: version
+      cases:
+        1: unavailable
+        2: s2
     doc: possibly light intensity of bottom-layers. new in version 2, unverified.
 
 instances:
+  layer_levels:
+    value: '(antialiasing_level == 0) ? 1 : antialiasing_level'
+
   layers:
     io: _root._io
     pos: ofs_layers
     type: layer
     repeat: expr
-    repeat-expr: num_layers * antialiasing_level
+    repeat-expr: num_layers * layer_levels
     doc: number of layers equals to num_layers attribute multiplied by the antialiasing_level.
+
 
 types:
   preview_image:
@@ -147,6 +167,13 @@ types:
         size: len
         type: print_properties_data
 
+  unavailable:
+    seq:
+      - size-eos: true
+
+  print_properties_unavailable:
+    seq:
+      - size: 8
 
   print_properties_data:
     seq:

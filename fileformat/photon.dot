@@ -24,18 +24,39 @@ digraph {
 			<TR><TD PORT="ofs_layers_pos">64</TD><TD PORT="ofs_layers_size">4</TD><TD>s4le</TD><TD PORT="ofs_layers_type">ofs_layers</TD></TR>
 			<TR><TD PORT="num_layers_pos">68</TD><TD PORT="num_layers_size">4</TD><TD>s4le</TD><TD PORT="num_layers_type">num_layers</TD></TR>
 			<TR><TD PORT="preview_lowres_pos">72</TD><TD PORT="preview_lowres_size">4</TD><TD>PreviewImage</TD><TD PORT="preview_lowres_type">preview_lowres</TD></TR>
-			<TR><TD PORT="print_time_pos">76</TD><TD PORT="print_time_size">4</TD><TD>s4le</TD><TD PORT="print_time_type">print_time</TD></TR>
-			<TR><TD PORT="projection_type_pos">80</TD><TD PORT="projection_type_size">4</TD><TD>s4le</TD><TD PORT="projection_type_type">projection_type</TD></TR>
-			<TR><TD PORT="print_properties_pos">84</TD><TD PORT="print_properties_size">8</TD><TD>PrintProperties</TD><TD PORT="print_properties_type">print_properties</TD></TR>
-			<TR><TD PORT="antialiasing_level_pos">92</TD><TD PORT="antialiasing_level_size">4</TD><TD>s4le</TD><TD PORT="antialiasing_level_type">antialiasing_level</TD></TR>
-			<TR><TD PORT="light_pwm_pos">96</TD><TD PORT="light_pwm_size">2</TD><TD>s2le</TD><TD PORT="light_pwm_type">light_pwm</TD></TR>
-			<TR><TD PORT="light_pwm_bottom_pos">98</TD><TD PORT="light_pwm_bottom_size">2</TD><TD>s2le</TD><TD PORT="light_pwm_bottom_type">light_pwm_bottom</TD></TR>
+			<TR><TD PORT="print_time_pos">76</TD><TD PORT="print_time_size">...</TD><TD>switch (version)</TD><TD PORT="print_time_type">print_time</TD></TR>
+			<TR><TD PORT="projection_type_pos">...</TD><TD PORT="projection_type_size">4</TD><TD>s4le</TD><TD PORT="projection_type_type">projection_type</TD></TR>
+			<TR><TD PORT="print_properties_pos">...</TD><TD PORT="print_properties_size">...</TD><TD>switch (version)</TD><TD PORT="print_properties_type">print_properties</TD></TR>
+			<TR><TD PORT="antialiasing_level_pos">...</TD><TD PORT="antialiasing_level_size">4</TD><TD>s4le</TD><TD PORT="antialiasing_level_type">antialiasing_level</TD></TR>
+			<TR><TD PORT="light_pwm_pos">...</TD><TD PORT="light_pwm_size">...</TD><TD>switch (version)</TD><TD PORT="light_pwm_type">light_pwm</TD></TR>
+			<TR><TD PORT="light_pwm_bottom_pos">...</TD><TD PORT="light_pwm_bottom_size">...</TD><TD>switch (version)</TD><TD PORT="light_pwm_bottom_type">light_pwm_bottom</TD></TR>
+		</TABLE>>];
+		photon__inst__layer_levels [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+			<TR><TD BGCOLOR="#E0FFE0">id</TD><TD BGCOLOR="#E0FFE0">value</TD></TR>
+			<TR><TD>layer_levels</TD><TD>(antialiasing_level == 0 ? 1 : antialiasing_level)</TD></TR>
 		</TABLE>>];
 		photon__inst__layers [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
 			<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
 			<TR><TD PORT="layers_pos">ofs_layers</TD><TD PORT="layers_size">36</TD><TD>Layer</TD><TD PORT="layers_type">layers</TD></TR>
-			<TR><TD COLSPAN="4" PORT="layers__repeat">repeat (num_layers * antialiasing_level) times</TD></TR>
+			<TR><TD COLSPAN="4" PORT="layers__repeat">repeat (num_layers * layer_levels) times</TD></TR>
 		</TABLE>>];
+photon__seq_print_time_switch [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<TR><TD BGCOLOR="#F0F2E4">case</TD><TD BGCOLOR="#F0F2E4">type</TD></TR>
+	<TR><TD>1</TD><TD PORT="case0">Unavailable</TD></TR>
+</TABLE>>];
+photon__seq_print_properties_switch [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<TR><TD BGCOLOR="#F0F2E4">case</TD><TD BGCOLOR="#F0F2E4">type</TD></TR>
+	<TR><TD>1</TD><TD PORT="case0">Unavailable</TD></TR>
+	<TR><TD>2</TD><TD PORT="case1">PrintProperties</TD></TR>
+</TABLE>>];
+photon__seq_light_pwm_switch [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<TR><TD BGCOLOR="#F0F2E4">case</TD><TD BGCOLOR="#F0F2E4">type</TD></TR>
+	<TR><TD>1</TD><TD PORT="case0">Unavailable</TD></TR>
+</TABLE>>];
+photon__seq_light_pwm_bottom_switch [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+	<TR><TD BGCOLOR="#F0F2E4">case</TD><TD BGCOLOR="#F0F2E4">type</TD></TR>
+	<TR><TD>1</TD><TD PORT="case0">Unavailable</TD></TR>
+</TABLE>>];
 		subgraph cluster__preview_image_header {
 			label="Photon::PreviewImageHeader";
 			graph[style=dotted];
@@ -71,6 +92,15 @@ digraph {
 				<TR><TD PORT="p4_pos">56</TD><TD PORT="p4_size">4</TD><TD>f4le</TD><TD PORT="p4_type">p4</TD></TR>
 			</TABLE>>];
 		}
+		subgraph cluster__unavailable {
+			label="Photon::Unavailable";
+			graph[style=dotted];
+
+			unavailable__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="_unnamed0_pos">0</TD><TD PORT="_unnamed0_size">?</TD><TD></TD><TD PORT="_unnamed0_type">_unnamed0</TD></TR>
+			</TABLE>>];
+		}
 		subgraph cluster__print_properties {
 			label="Photon::PrintProperties";
 			graph[style=dotted];
@@ -103,6 +133,15 @@ digraph {
 				<TR><TD PORT="image_pos">ofs_image</TD><TD PORT="image_size">len_image</TD><TD></TD><TD PORT="image_type">image</TD></TR>
 			</TABLE>>];
 		}
+		subgraph cluster__print_properties_unavailable {
+			label="Photon::PrintPropertiesUnavailable";
+			graph[style=dotted];
+
+			print_properties_unavailable__seq [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">
+				<TR><TD BGCOLOR="#E0FFE0">pos</TD><TD BGCOLOR="#E0FFE0">size</TD><TD BGCOLOR="#E0FFE0">type</TD><TD BGCOLOR="#E0FFE0">id</TD></TR>
+				<TR><TD PORT="_unnamed0_pos">0</TD><TD PORT="_unnamed0_size">8</TD><TD></TD><TD PORT="_unnamed0_type">_unnamed0</TD></TR>
+			</TABLE>>];
+		}
 		subgraph cluster__preview_image {
 			label="Photon::PreviewImage";
 			graph[style=dotted];
@@ -123,11 +162,25 @@ digraph {
 	}
 	photon__seq:preview_highres_type -> preview_image__seq [style=bold];
 	photon__seq:preview_lowres_type -> preview_image__seq [style=bold];
-	photon__seq:print_properties_type -> print_properties__seq [style=bold];
+	photon__seq:print_time_type -> photon__seq_print_time_switch [style=bold];
+	photon__seq_print_time_switch:case0 -> unavailable__seq [style=bold];
+	photon__seq:version_type -> photon__seq:print_time_type [color="#404040"];
+	photon__seq:print_properties_type -> photon__seq_print_properties_switch [style=bold];
+	photon__seq_print_properties_switch:case0 -> unavailable__seq [style=bold];
+	photon__seq_print_properties_switch:case1 -> print_properties__seq [style=bold];
+	photon__seq:version_type -> photon__seq:print_properties_type [color="#404040"];
+	photon__seq:light_pwm_type -> photon__seq_light_pwm_switch [style=bold];
+	photon__seq_light_pwm_switch:case0 -> unavailable__seq [style=bold];
+	photon__seq:version_type -> photon__seq:light_pwm_type [color="#404040"];
+	photon__seq:light_pwm_bottom_type -> photon__seq_light_pwm_bottom_switch [style=bold];
+	photon__seq_light_pwm_bottom_switch:case0 -> unavailable__seq [style=bold];
+	photon__seq:version_type -> photon__seq:light_pwm_bottom_type [color="#404040"];
+	photon__seq:antialiasing_level_type -> photon__inst__layer_levels [color="#404040"];
+	photon__seq:antialiasing_level_type -> photon__inst__layer_levels [color="#404040"];
 	photon__seq:ofs_layers_type -> photon__inst__layers:layers_pos [color="#404040"];
 	photon__inst__layers:layers_type -> layer__seq [style=bold];
 	photon__seq:num_layers_type -> photon__inst__layers:layers__repeat [color="#404040"];
-	photon__seq:antialiasing_level_type -> photon__inst__layers:layers__repeat [color="#404040"];
+	photon__inst__layer_levels:layer_levels_type -> photon__inst__layers:layers__repeat [color="#404040"];
 	print_properties__seq:ofs_type -> print_properties__inst__data:data_pos [color="#404040"];
 	print_properties__seq:len_type -> print_properties__inst__data:data_size [color="#404040"];
 	print_properties__inst__data:data_type -> print_properties_data__seq [style=bold];
