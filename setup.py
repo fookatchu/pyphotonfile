@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='pyphotonfile',
-      version='0.1.1',
+      version='0.2.0',
       # packages=['pyphotonfile'],
       author="Heiko Westermann",
       author_email="heiko+pyphotonfile@orgizm.net",
