@@ -19,6 +19,10 @@ print(photon.layers[0].sublayers[0].layer_thickness)    # layers have individual
 print(photon.layers[0].sublayers[0].exposure_time)
 print(photon.layers[0].sublayers[0].off_time)
 
+# modification of global parameters
+photon.exposure_time = 10
+photon.bottom_layers = 3
+
 # the shown variables below are the only meaningfull ones. Be aware that these are not protected. change those values at your own risk!
 print(photon.header)
 print(photon.version)
