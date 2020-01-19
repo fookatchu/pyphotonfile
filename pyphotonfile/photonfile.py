@@ -105,8 +105,8 @@ class Layer:
             comparisons.append(a == b)
         return all(comparisons)
 
-    # def __repr__(self):
-    #     return 'Layer(%r, %r, %r)' % (self.layer_thickness, self.exposure_time, self.off_time)
+    def __repr__(self):
+        return 'Layer({})'.format(self.sublayers)
 
 class SubLayer:
     """
@@ -132,7 +132,7 @@ class SubLayer:
         return all(comparisons)
 
     def __repr__(self):
-        return 'SubLayer(%r, %r, %r)' % (self.layer_thickness, self.exposure_time, self.off_time)
+        return 'SubLayer(%r, %r, %r)' % (round(self.layer_thickness, 4), self.exposure_time, self.off_time)
 
 
 class Photon:
