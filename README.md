@@ -92,7 +92,6 @@ if photon.version > 1:
 
 TODO / Roadmap (contributions welcome)
 ========================================
- - add support for anti-aliasing feature / 'v2' photon-file format
  - release proper documentation
  - remove dependency of template binary file for newly created photon-files
  - add support for photonS file format
