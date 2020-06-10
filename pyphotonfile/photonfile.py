@@ -384,7 +384,7 @@ class Photon:
         """
         Exports layer image at idx to the supplied filename.
         """
-        img = rle_to_imgarray(sublayer._data) * 255
+        img = rle_to_imgarray(sublayer._data).astype('uint8') * 255
         Image.fromarray(img).convert('RGB').save(filepath)
 
 
