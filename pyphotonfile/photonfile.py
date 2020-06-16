@@ -425,6 +425,7 @@ class Photon:
         seems to be not used by the firmware. If keyword args are ommited, falls back to global values.
         """
         files = glob.glob(os.path.join(dirpath, "[0-9][0-9][0-9][0-9][0-9]_[0-9][0-9].png"))
+        files = sorted(files)
         layers = []
         last_file_id = ''
         for filepath in files:
