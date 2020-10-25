@@ -1,3 +1,5 @@
+**WARNING**: I currently don't have a printer (and time) on hand anymore to support this project. Please have a look at the forks if the current state of the project does not work for you!
+
 pyPhotonfile is a library used for manipulating Photon- and cbddlp-files created for the Anycubic Photon 3D-Printer and compatibles (e.g. Elegoo Mars, etc.). Currently it supports removing and adding new layers as well as changing global parameters like the exposure time, etc. You are free to play around with all exposed variables, but be aware that changes might not be supported by the printer firmwares. Let me know if you crash your printer so that I can implement safety measures. 
 A general description of the fileformat can be found in folder 'fileformat' including fancy graphs.
 It is based on the work done by [PhotonFileEditor](https://github.com/Photonsters/PhotonFileEditor). While PhotonFileEditor works, I was in need of a clean library which is why I refactored most of the code.
