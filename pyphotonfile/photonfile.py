@@ -40,6 +40,33 @@ def rle_to_imgarray(data):
     rgb2d = x.reshape((2560,1440))                # data is stored in rows of 2560
     return rgb2d
 
+def encode_image_preview(input: Image):
+    output = bytes()
+    prev = -1
+    count = 0
+    c = 0
+    def flush():
+        nonlocal count, output, prev
+        if count > 1: prev |= 0x0020
+        output += struct.pack("H", prev)
+        if count > 1: output += struct.pack("BB", (count - 1) & 0xFF, (count - 1) >> 8)
+        count = 0
+
+    for y in range(input.height):
+        for x in range(input.width):
+            r, g, b, _ = input.getpixel((x, y))
+            c = (r >> 3 << 11) | (g >> 3 << 6) | (b >> 3)
+            if (prev == c and count < 4096) or prev == -1:
+                count += 1
+                prev = c
+            else:
+                flush()
+                count = 1
+                prev = c
+
+    flush()
+    return output
+
 
 def imgarr_to_rle(imgarr):
     """
@@ -252,6 +279,20 @@ class Photon:
             self.layers.append(layer)
 
 
+    def set_preview_highres(self, image: Image):
+        self.preview_highres_data = encode_image_preview(image)
+        self.preview_highres_data_length = len(self.preview_highres_data)
+        self.preview_highres_resolution_x = image.width
+        self.preview_highres_resolution_y = image.height
+
+
+    def set_preview_lowres(self, image: Image):
+        self.preview_lowres_data = encode_image_preview(image)
+        self.preview_lowres_data_length = len(self.preview_lowres_data)
+        self.preview_lowres_resolution_x = image.width
+        self.preview_lowres_resolution_y = image.height
+
+
     def write(self, filepath):
         """
         Writes the Photon-file to disk.
@@ -273,7 +314,8 @@ class Photon:
             f.write(struct.pack('i', self.bottom_layers))
             f.write(struct.pack('i', self.resolution_x))
             f.write(struct.pack('i', self.resolution_y))
-            f.write(struct.pack('i', self.preview_highres_header_address))
+            offsets['preview_highres_header_address'] = f.tell()   # remember position in file to later add the correct address
+            f.write(struct.pack('i', 0x0))
             offsets['layer_def_address'] = f.tell()     # remember position in file to later add the correct address
             f.write(struct.pack('i', 0x0 ))
             f.write(struct.pack('i', len(self.layers)))
@@ -295,18 +337,23 @@ class Photon:
                 f.write(b'\x00' * 3 * 4)
             else:
                 f.write(b'\x00' * 6 * 4)  # padding
+            addresses['preview_highres_header_address'] = f.tell()   # remember position in file to later add the correct address
             f.write(struct.pack('i', self.preview_highres_resolution_x))
             f.write(struct.pack('i', self.preview_highres_resolution_y))
-            f.write(struct.pack('i', self.preview_highres_data_address))
-            f.write(struct.pack('i', self.preview_highres_data_length))
+            offsets['preview_highres_data_address'] = f.tell()   # remember position in file to later add the correct address
+            f.write(struct.pack('i', 0x0))
+            f.write(struct.pack('i', len(self.preview_highres_data)))
             f.write(b'\x00' * 4 * 4)
+            addresses['preview_highres_data_address'] = f.tell()   # remember position in file to later add the correct address
             f.write(self.preview_highres_data)
             addresses['preview_lowres_header_address'] = f.tell()   # remember position in file to later add the correct address
             f.write(struct.pack('i', self.preview_lowres_resolution_x))
             f.write(struct.pack('i', self.preview_lowres_resolution_y))
-            f.write(struct.pack('i', self.preview_lowres_data_address))
-            f.write(struct.pack('i', self.preview_lowres_data_length))
+            offsets['preview_lowres_data_address'] = f.tell()   # remember position in file to later add the correct address
+            f.write(struct.pack('i', 0x0 ))
+            f.write(struct.pack('i', len(self.preview_lowres_data)))
             f.write(b'\x00' * 4 * 4)
+            addresses['preview_lowres_data_address'] = f.tell()   # remember position in file to later add the correct address
             f.write(self.preview_lowres_data)
             if self.version > 1:
                 addresses['print_properties_address'] = f.tell()    # remember position in file to later add the correct address
