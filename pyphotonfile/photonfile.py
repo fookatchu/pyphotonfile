@@ -453,7 +453,7 @@ class Photon:
         """
         layer = self.create_layer(images, layer_thickness, exposure_time, off_time)
         self.delete_layer(idx)
-        self.insert_layer(idx, layer)
+        self.layers.insert(idx, layer)
 
     def delete_layer(self, idx):
         """
